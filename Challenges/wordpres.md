@@ -1,4 +1,4 @@
-Please follow below document to install the wordpress on the EC2 instance. Please follow below consideration while you are follwoing the documentation:
+Please follow below document to install the wordpress on the EC2 instance and consider below options while you are follwoing the it:
 
 Choose region as -> "Mumbai"
 Always choose "t2.micro" as your instance type
