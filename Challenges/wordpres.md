@@ -10,5 +10,5 @@ Note:
 
 If you are not comfortable with the way of "SSH connect", please try using "EC2 Instance Connect" option while logging into the instance. 
 
-![Uploading image.png…]()
+![image](https://github.com/user-attachments/assets/e4dc42ab-ebfa-455e-90bb-d398e1bef537)
 
