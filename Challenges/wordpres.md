@@ -1,4 +1,4 @@
-Step 1: Launch an Amazon EC2 Instance
+![image](https://github.com/user-attachments/assets/7d6fb2aa-0f7b-4e48-b717-801a4e937b51)Step 1: Launch an Amazon EC2 Instance
 Log in to your AWS account.
 
 Navigate to the EC2 dashboard.
