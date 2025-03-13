@@ -63,7 +63,7 @@
 14. Copy paste the below commands and execute it. 
 
 CREATE DATABASE a4lwordpress;
-CREATE USER a4lwordpress IDENTIFIED BY a4lwordpress;
+CREATE USER a4lwordpress IDENTIFIED BY 'a4lwordpress';
 GRANT ALL ON a4lwordpress.* TO a4lwordpress;
 FLUSH PRIVILEGES;
 
