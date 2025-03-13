@@ -1,4 +1,4 @@
-#This document shows how to create the maria db. Please follow below steps to create and connect to the db 
+* This document shows how to create the maria db. Please follow below steps to create and connect to the db 
 
 1. Login into AWS RDS Console
 2. Click on Create database
@@ -56,12 +56,12 @@
 16. Click on Create Database. 
 
 
-#### Connecting to the database
+* Connecting to the database
 
-# Download the SQL workbench according to your OS from the link - https://dev.mysql.com/downloads/workbench/
+* Download the SQL workbench according to your OS from the link - https://dev.mysql.com/downloads/workbench/
 
-# Open the SQL Workbenach
-# Click on the " + " Symbol on the home page in "MySQL Connections"
+* Open the SQL Workbenach
+* Click on the " + " Symbol on the home page in "MySQL Connections"
 
 <img width="1010" alt="image" src="https://github.com/user-attachments/assets/617c68e8-13db-451c-af00-7395fca5545a" />
 
@@ -95,11 +95,9 @@
 
 
 
-![image](https://github.com/user-attachments/assets/484c7a69-f687-469b-8da1-f25b9277a18c)
-
 11. Once authenticated you will be presented with a screen like this. 
 
-<img width="812" alt="image" src="https://github.com/user-attachments/assets/cde9635e-6035-4482-b04b-68056ee3afbf" />
+![image](https://github.com/user-attachments/assets/484c7a69-f687-469b-8da1-f25b9277a18c)
 
 
 12. Click on "Schemas" tab to see the available databases in your server. 
