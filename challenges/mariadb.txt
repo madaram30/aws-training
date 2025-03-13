@@ -52,7 +52,7 @@
     3.3 Paste the endpoint under hostname in workbench. 
 4. Leave the port as it is. 
 5. change the username as "admin". (This is configured during creation of the database)
-6. Leave as it is and click on "OK"
+6. Leave as it is and click on "OK".
 7. Now you will be see a new connection under "MySQL Connections" with the name "MariaDB sever"
 8. Click on the connection. 
 9. Click on "Continue Anyway" if any warning popsup. 
