@@ -1,0 +1,33 @@
+
+fruit: "banana"
+fruits: [“mango”, “apple”, “banana”]
+fruits:
+  - “mango”
+  - “apple”
+  - ‘banana’
+  - Pineapple
+
+fruits: 
+  - name: Banana
+    color: Yellow
+    price_per_kg: 1.2
+    season: Year-round
+  - name: Orange
+    color: Orange
+    price_per_kg: 2.0
+    season: Winter
+  - name: Mango
+    color: Yellow
+    price_per_kg: 4.0
+    season: Summer
+  - name: Apple
+    color: Red
+    price_per_kg: 3.5
+    season: Fall
+
+fruits:
+  banana:
+    properties:
+      type: fruit
+      color: yellow
+
