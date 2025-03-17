@@ -6,10 +6,11 @@ The project contains total 3 components.
 
 Step 1 - CloudFormation Stack Creation: 
   1. Make sure you replace the tags that are placed in the cloudformation/s3-events-stack.yaml file before create the stacks.
-  2. Create the CloudFormation stack to create the resources - S3 buckets and Role.
-  3. Use the infrastructure composer to create the buckets and roles.
-  4. If it too difficult to create it with, copy/paste the yaml template from the cloudformation/s3-events-stack.yaml.
-  5. Complete the stack creation to proceed with the Lambda Function creation.
+     1.1 S3 bucket names, Account number and the lambda function name must be replaced in the yaml template. "<>"
+  3. Create the CloudFormation stack to create the resources - S3 buckets and Role.
+  4. Use the infrastructure composer to create the buckets and roles.
+  5. If it too difficult to create it with, copy/paste the yaml template from the cloudformation/s3-events-stack.yaml.
+  6. Complete the stack creation to proceed with the Lambda Function creation.
 
 Step 2 - Create the Lambda function:
   1. Go to Lambda Service and click create function.
