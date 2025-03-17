@@ -41,4 +41,3 @@ Step 4 - Test the project:
 
 Errors:
   1. If you can't see the logs in the CloudWatch, please check the IAM role that is created. Make sure you replaced <lambda-function-name> with the correct name.
-  2. 
