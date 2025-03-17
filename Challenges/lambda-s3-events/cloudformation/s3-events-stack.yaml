@@ -2,7 +2,7 @@ Resources:
   Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: my-demo-s3-events-source-s3-bucket
+      BucketName: <source-bucket-name>
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -12,7 +12,7 @@ Resources:
   Bucket2:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: my-demo-s3-events-processed-s3-bucket
+      BucketName: <destination-bucket-name>
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -41,16 +41,16 @@ Resources:
                 Action:
                   - s3:*
                 Resource:
-                  - arn:aws:s3:::my-demo-s3-events-source-s3-bucket
-                  - arn:aws:s3:::my-demo-s3-events-source-s3-bucket/*
-                  - arn:aws:s3:::my-demo-s3-events-processed-s3-bucket
-                  - arn:aws:s3:::my-demo-s3-events-processed-s3-bucket/*
+                  - arn:aws:s3:::<source-bucket-name>
+                  - arn:aws:s3:::<source-bucket-name>/*
+                  - arn:aws:s3:::<destination-bucket-name>
+                  - arn:aws:s3:::<destination-bucket-name>/*
               - Effect: Allow
                 Action: logs:CreateLogGroup
-                Resource: arn:aws:logs:ap-south-1:588738614244:*
+                Resource: arn:aws:logs:ap-south-1:<your-account-number>:*
               - Effect: Allow
                 Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - arn:aws:logs:ap-south-1:588738614244:log-group:/aws/lambda/s3-events-lambda-function:*
+                  - arn:aws:logs:ap-south-1:588738614244:log-group:/aws/lambda/<lambda-function-name>:*
