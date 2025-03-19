@@ -5,7 +5,7 @@ The project contains total 3 components.
   3. IAM Role - The role which to be assigned to Lambda. This gives lambda permissions to access S3 and CloudWatch
 
 Step 1 - CloudFormation Stack Creation: 
-  1. Make sure you replace the tags that are placed in the cloudformation/s3-events-stack.yaml file before create the stacks.
+  1. Make sure you replace the tags that are placed in the current folder **cloudformation/s3-events-stack.yaml** file before create the stacks.
      1.1 S3 bucket names, Account number and the lambda function name must be replaced in the yaml template. "<>"
   3. Create the CloudFormation stack to create the resources - S3 buckets and Role.
   4. Use the infrastructure composer to create the buckets and roles.
