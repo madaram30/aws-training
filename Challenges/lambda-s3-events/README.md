@@ -23,7 +23,7 @@ Step 2 - Create the Lambda function:
 
 Step 3 - Configure the Lambda function:
   1. Once the Lambda function is created, click on the function name to configure it.
-  2. Please download the ZIP file "my-deplpyment-package.zip" into your local.
+  2. Please download the ZIP file "my-deployment-package.zip" into your local.
   3. Go to the "Code" section to upload the ZIP file that was downloaded.
   4. Once the above step is completed successfully, go to "Configuration" section/
   5. Under "General Configuration", Click on "edit" and change the time out to "1 Min, 0 Sec".
