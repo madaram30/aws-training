@@ -53,4 +53,4 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - arn:aws:logs:ap-south-1:588738614244:log-group:/aws/lambda/<lambda-function-name>:*
+                  - arn:aws:logs:ap-south-1:<your-account-number>:log-group:/aws/lambda/<lambda-function-name>:*
