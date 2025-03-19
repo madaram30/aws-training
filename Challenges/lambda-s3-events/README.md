@@ -27,7 +27,7 @@ Step 3 - Configure the Lambda function:
   3. Go to the "Code" section to upload the ZIP file that was downloaded.
   4. Once the above step is completed successfully, go to "Configuration" section/
   5. Under "General Configuration", Click on "edit" and change the time out to "1 Min, 0 Sec".
-  6. Go to "Envrionment Varialbes", Click on "Edit" to add a variable.
+  6. Go to "Envrionment Variables", Click on "Edit" to add a variable.
   7. Add the key as "processed_bucket" and value as the your target S3 bucket name that you created in Step 1.
   8. Click on the Trigger and Select the source as S3 service. Choose the source bucket created in Step 1.
   9. Click on the checkbox "I Acknowledge..." and click on "Add" to add the trigger. 
