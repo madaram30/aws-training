@@ -1,0 +1,79 @@
+Resources:
+  SourceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: <source-bucket-name>
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: alias/aws/s3
+
+  DestinationBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: <destination-bucket-name>
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: alias/aws/s3
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource:
+                  - arn:aws:s3:::<source-bucket-name>
+                  - arn:aws:s3:::<source-bucket-name>/*
+                  - arn:aws:s3:::<destination-bucket-name>
+                  - arn:aws:s3:::<destination-bucket-name>/*
+              - Effect: Allow
+                Action: logs:CreateLogGroup
+                Resource: arn:aws:logs:ap-south-1:<your-account-number>:*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - arn:aws:logs:ap-south-1:588738614244:log-group:/aws/lambda/<lambda-function-name>:*
+
+  PixelLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: <lambda-function-name>
+      Handler: lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Code:
+        S3Bucket: source_bucket  # The bucket where your zip file is stored
+        S3Key: lambda-code.zip  # The key (path) of the zip file in the S3 bucket
+      Runtime: python3.9
+      Timeout: 60  # 1 minute timeout
+      Environment:
+        Variables:
+          processed_bucket: !Ref DestinationBucket
+
+  S3BucketNotification:
+    Type: AWS::S3::BucketNotification
+    Properties:
+      Bucket: !Ref SourceBucket  # The source bucket that triggers the Lambda
+      LambdaConfigurations:
+        - Event: 's3:ObjectCreated:*'
+          Function: !GetAtt MyLambdaFunction.Arn

@@ -32,8 +32,6 @@ def lambda_handler(event, context):
 	pixelate((48,48), img_download_path, '/tmp/pixelated-48x48-{}'.format(object_key) )
 	pixelate((64,64), img_download_path, '/tmp/pixelated-64x64-{}'.format(object_key) )
 	
-
-	processed_bucket = source_bucket + "processed"
 	# uploading the pixelated version to destination bucket
 	upload_key = 'pixelated-{}'.format(object_key)
 	s3_client.upload_file('/tmp/pixelated-8x8-{}'.format(object_key), processed_bucket,'pixelated-8x8-{}'.format(key))
