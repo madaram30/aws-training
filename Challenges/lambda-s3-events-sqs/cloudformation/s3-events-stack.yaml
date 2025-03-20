@@ -1,23 +1,46 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "This template will create S3 Buckets, Role and Lambda Function"
+
+Parameters:
+  SourceBucketName:
+    Type: String
+    Description: "Provide the Source Bucket Name in which the images will be uploaded."
+  DestinationBucketName:
+    Type: String
+    Description: "Provide the Destination Bucket Name in which the pixlated images will be uploaded."
+  LambdaFunctionName:
+    Type: String
+    Description: "Provide the Lambda Function Name."
+    Default: "SQS-S3-Lambda-Event-Function"
+  LambdaRunTime:
+    Type: String
+    Description: "Provide the Run time of the Function that you want to execute on."
+    Default: "python3.9"
+    AllowedValues:
+      - "python3.7"
+      - "python3.8"
+      - "python3.9"
+      - "python3.10"
+      - "python3.11"
+  LambdaSourceCodeBucketName:
+    Type: String
+    Description: "Provide the S3 Bucket Name in which the source code .ZIP file exists."
+  LambdaSourceCodeZIPFileName:
+    Type: String
+    Description: "Provide the .ZIP file name you want to upload."
+
+
 Resources:
   SourceBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: <source-bucket-name>
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: aws:kms
-              KMSMasterKeyID: alias/aws/s3
+      BucketName: !Ref SourceBucketName
 
   DestinationBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: <destination-bucket-name>
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: aws:kms
-              KMSMasterKeyID: alias/aws/s3
+      BucketName: !Ref DestinationBucketName
 
   LambdaRole:
     Type: AWS::IAM::Role
@@ -41,39 +64,31 @@ Resources:
                 Action:
                   - s3:*
                 Resource:
-                  - arn:aws:s3:::<source-bucket-name>
-                  - arn:aws:s3:::<source-bucket-name>/*
-                  - arn:aws:s3:::<destination-bucket-name>
-                  - arn:aws:s3:::<destination-bucket-name>/*
+                  - !GetAtt SourceBucket.Arn
+                  - !Sub "${SourceBucket.Arn}/*"
+                  - !GetAtt DestinationBucket.Arn
+                  - !Sub "${DestinationBucket.Arn}/*"
               - Effect: Allow
                 Action: logs:CreateLogGroup
-                Resource: arn:aws:logs:ap-south-1:<your-account-number>:*
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*'
               - Effect: Allow
                 Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - arn:aws:logs:ap-south-1:588738614244:log-group:/aws/lambda/<lambda-function-name>:*
+                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${LambdaFunctionName}:*'
 
   PixelLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: <lambda-function-name>
+      FunctionName: !Ref LambdaFunctionName
       Handler: lambda_handler
       Role: !GetAtt LambdaRole.Arn
       Code:
-        S3Bucket: source_bucket  # The bucket where your zip file is stored
-        S3Key: lambda-code.zip  # The key (path) of the zip file in the S3 bucket
-      Runtime: python3.9
+        S3Bucket: !Ref LambdaSourceCodeBucketName  
+        S3Key: !Ref LambdaSourceCodeZIPFileName
+      Runtime: !Ref LambdaRunTime
       Timeout: 60  # 1 minute timeout
       Environment:
         Variables:
           processed_bucket: !Ref DestinationBucket
-
-  S3BucketNotification:
-    Type: AWS::S3::BucketNotification
-    Properties:
-      Bucket: !Ref SourceBucket  # The source bucket that triggers the Lambda
-      LambdaConfigurations:
-        - Event: 's3:ObjectCreated:*'
-          Function: !GetAtt MyLambdaFunction.Arn

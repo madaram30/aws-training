@@ -14,11 +14,13 @@ if not processed_bucket:
 
 def lambda_handler(event, context):
     try:
+        print(f"Record: {event['Records']}")
         # Loop through SQS records (only one record per event)
         for record in event['Records']:
             # Parse the SQS message body (which contains the bucket and key)
             try:
                 sqs_message = json.loads(record['body'])
+                print(f"SQS Message: {sqs_message}")
             except json.JSONDecodeError as e:
                 print(f"Error decoding JSON: {e}")
                 continue  # Skip this record if it cannot be parsed
