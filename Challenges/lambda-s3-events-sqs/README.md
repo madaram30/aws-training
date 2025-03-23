@@ -1,3 +1,5 @@
+The YAML template is completely automated, no manual action is required. 
+
 Please follow below steps to complete the lambda-s3-events project. 
 The project contains total 5 components.
   1. S3 - Two Bucekts. One for the Source and one for Destination
@@ -16,28 +18,11 @@ Step 2 - CloudFormation Stack Creation:
   1. Go to CloudFormation console and click on create stack (with new resources). 
   2. Click on "Choose Existing Template".
   3. Choose "upload a template file".
-  4. Click on "Choose File" and then select the yaml file that you have created in the last step.
-  5. Now, i
-
-Step 2 - Create the Lambda function:
-  1. Go to Lambda Service and click create function.
-  2. Choose "Author From Scratch"
-  3. Provide a function name
-  4. Choose run time as "Python 3.9"
-  5. In the permission section, expand the option "Change default Execution Role"
-  6. Select "Use an existing role" and choose the role that was created in step 1.
-  7. Click on Create Function
-
-Step 3 - Configure the Lambda function:
-  1. Once the Lambda function is created, click on the function name to configure it.
-  2. Please download the ZIP file "my-deplpyment-package.zip" into your local.
-  3. Go to the "Code" section to upload the ZIP file that was downloaded.
-  4. Once the above step is completed successfully, go to "Configuration" section/
-  5. Under "General Configuration", Click on "edit" and change the time out to "1 Min, 0 Sec".
-  6. Go to "Envrionment Varialbes", Click on "Edit" to add a variable.
-  7. Add the key as "processed_bucket" and value as the your target S3 bucket name that you created in Step 1.
-  8. Click on the Trigger and Select the source as S3 service. Choose the source bucket created in Step 1.
-  9. Click on the checkbox "I Acknowledge..." and click on "Add" to add the trigger. 
+  4. Click on "Choose File" and then select the yaml file that you have created in the last step. Then, click Next. 
+  5. You will be asked to provide stack name and the parameter values. Some parameters are having default values, some don't.
+  6. Make sure you provide source bucket name and destination bucket name appending your account number.
+  7. The source code bucket name and object key should be given correctly, otherwise the wrong code might get uploaded into lambda.
+  8. After providing parameter values, click next and acknowledge the IAM resource creation, then Submit the stack creation. 
 
 Step 4 - Test the project:
   1. Go to your source S3 bucket that is created in Step 1.
@@ -45,7 +30,3 @@ Step 4 - Test the project:
   3. To observe the execution of the function, go to cloudwatch and choose "Log Groups" under logs.
   4. Click on the logs group -> /aws/lambda/<lambda-function-name>
   5. Once the function is executed successfully, you must be able to see the files in your target S3 bucket.
-
-
-Errors:
-  1. If you can't see the logs in the CloudWatch, please check the IAM role that is created. Make sure you replaced <lambda-function-name> with the correct name.
