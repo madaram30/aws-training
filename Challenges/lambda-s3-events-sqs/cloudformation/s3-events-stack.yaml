@@ -29,6 +29,10 @@ Parameters:
   LambdaSourceCodeZIPFileName:
     Type: String
     Description: "Provide the .ZIP file name you want to upload."
+  QueueName:
+    Type: String
+    Description: "Provide the SQS Queue Name"
+    Default: "Decopuling-Queue"
 
 
 Resources:
@@ -36,6 +40,10 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref SourceBucketName
+      NotificationConfiguration:
+        QueueConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Queue: !GetAtt DeCouplingQueue.Arn
 
   DestinationBucket:
     Type: AWS::S3::Bucket
@@ -60,7 +68,8 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              - Effect: Allow
+              - Sid: "AllowLambdatoaccessS3bucket"
+                Effect: Allow
                 Action:
                   - s3:*
                 Resource:
@@ -68,10 +77,20 @@ Resources:
                   - !Sub "${SourceBucket.Arn}/*"
                   - !GetAtt DestinationBucket.Arn
                   - !Sub "${DestinationBucket.Arn}/*"
-              - Effect: Allow
+              - Sid: "AllowLambdatoaccessSQSqueue"
+                Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:GetQueueAttributes
+                  - sqs:DeleteMessage
+                Resource:
+                  - !GetAtt DeCouplingQueue.Arn
+              - Sid: "AllowLambdatoLogGroup"
+                Effect: Allow
                 Action: logs:CreateLogGroup
                 Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*'
-              - Effect: Allow
+              - Sid: "AllowLambdatoLogStream"
+                Effect: Allow
                 Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
@@ -92,3 +111,30 @@ Resources:
       Environment:
         Variables:
           processed_bucket: !Ref DestinationBucket
+  
+  DeCouplingQueue: 
+    Type: AWS::SQS::Queue
+    Properties: 
+      QueueName: !Ref QueueName
+      VisibilityTimeout: 60 #Visibility timeout must match with Lambda Timeout
+  
+   
+  SQSPolicy: 
+    Type: AWS::SQS::QueuePolicy
+    Properties: 
+      Queues: 
+        - !Ref DeCouplingQueue
+      PolicyDocument: 
+        Statement: 
+          - Action: 
+              - SQS:SendMessage
+            Effect: "Allow"
+            Resource: !GetAtt DeCouplingQueue.Arn
+            Principal:  
+              Service: "s3.amazonaws.com"      
+      
+  SQSTOLambdaTrigger:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt DeCouplingQueue.Arn
+      FunctionName: !GetAtt PixelLambdaFunction.Arn
