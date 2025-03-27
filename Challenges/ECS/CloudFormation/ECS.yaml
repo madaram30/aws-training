@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  # ECS Cluster
+  ECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: 'MyECSCluster'
+
+  # Load Balancer
+  LoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      Name: 'MyALB'
+      Subnets:
+        - Ref: 'SubnetId1'
+        - Ref: 'SubnetId2'
+      SecurityGroups:
+        - Ref: 'SecurityGroupId'
+      LoadBalancerAttributes:
+        - Key: 'idle_timeout.timeout_seconds'
+          Value: '60'
+      Scheme: 'internet-facing'
+      Type: 'application'
+
+  # Target Group for the Load Balancer
+  TargetGroup:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      Name: 'MyTargetGroup'
+      Port: 80
+      Protocol: 'HTTP'
+      VpcId: Ref: 'VPCId'
+
+  # ECS Task Definition
+  ECSTaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: 'MyTaskDefinition'
+      NetworkMode: 'awsvpc'
+      ContainerDefinitions:
+        - Name: 'ContainerOne'
+          Image: 'nginx:latest'
+          Memory: 512
+          PortMappings:
+            - ContainerPort: 80
+          Environment:
+            - Name: 'ENV_VAR_1'
+              Value: 'Value1'
+            - Name: 'ENV_VAR_2'
+              Value: 'Value2'
+            - Name: 'ENV_VAR_3'
+              Value: 'Value3'
+            - Name: 'ENV_VAR_4'
+              Value: 'Value4'
+          
+        - Name: 'ContainerTwo'
+          Image: 'nginx:latest'
+          Memory: 512
+          PortMappings:
+            - ContainerPort: 8080
+          Environment:
+            - Name: 'ENV_VAR_1'
+              Value: 'Value1'
+            - Name: 'ENV_VAR_2'
+              Value: 'Value2'
+            - Name: 'ENV_VAR_3'
+              Value: 'Value3'
+            - Name: 'ENV_VAR_4'
+              Value: 'Value4'
+
+  # ECS Service
+  ECSService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: Ref: 'ECSCluster'
+      DesiredCount: 2
+      LaunchType: 'FARGATE'
+      TaskDefinition: Ref: 'ECSTaskDefinition'
+      LoadBalancers:
+        - TargetGroupArn: Ref: 'TargetGroup'
+          ContainerName: 'ContainerOne'
+          ContainerPort: 80
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - Ref: 'SubnetId1'
+            - Ref: 'SubnetId2'
+          SecurityGroups:
+            - Ref: 'SecurityGroupId'
+          AssignPublicIp: 'ENABLED'
+
+Outputs:
+  LoadBalancerDNSName:
+    Description: 'DNS Name of the load balancer'
+    Value: !GetAtt 'LoadBalancer.DNSName'
