@@ -1,21 +1,70 @@
+---
 AWSTemplateFormatVersion: '2010-09-09'
+Description: "This template will create S3 Buckets, Role and Lambda Function"
+
+Parameters:
+  VPCID: 
+    Description: "Select at least two SubNet IDs for the ECS Service and the load-balancer"
+    Type: AWS::EC2::VPC::Id
+  ECSClusterName:
+    Type: String
+    Description: "Provide the ECS Cluster Name"
+  ALBName:
+    Type: String
+    Description: "Provide the ALB Name"
+  SubNetIDs: 
+    Description: "Select at least two SubNet IDs for the ECS Service and the load-balancer"
+    Type: List<AWS::EC2::Subnet::Id>
+
 Resources:
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB Security Group
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      # SecurityGroupEgress:
+      #   - IpProtocol: "-1"
+      #     CidrIp: 0.0.0.0/0
+  
+  ECSServiceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS Service Security Group
+      VpcId: !Ref VPCID
+      # SecurityGroupEgress:
+      #   - IpProtocol: "-1"
+      #     CidrIp: 0.0.0.0/0
+  InboundRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId: !GetAtt ALBSecurityGroup.GroupId
+      GroupId: !GetAtt ECSServiceSecurityGroup.GroupId
+
   # ECS Cluster
   ECSCluster:
     Type: 'AWS::ECS::Cluster'
     Properties:
-      ClusterName: 'MyECSCluster'
+      ClusterName: !Ref ECSClusterName
 
   # Load Balancer
   LoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
     Properties:
-      Name: 'MyALB'
+      Name: !Ref ALBName
       Subnets:
-        - Ref: 'SubnetId1'
-        - Ref: 'SubnetId2'
+        - !Select [ 0, !Ref SubNetIDs ]
+        - !Select [ 1, !Ref SubNetIDs ]
       SecurityGroups:
-        - Ref: 'SecurityGroupId'
+        - !Ref ALBSecurityGroup
       LoadBalancerAttributes:
         - Key: 'idle_timeout.timeout_seconds'
           Value: '60'
@@ -29,64 +78,94 @@ Resources:
       Name: 'MyTargetGroup'
       Port: 80
       Protocol: 'HTTP'
-      VpcId: Ref: 'VPCId'
+      VpcId: !Ref VPCID
+      TargetType: ip
+
+  ListenerRule:
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+      Conditions:
+      - Field: path-pattern
+        PathPatternConfig:
+          Values:
+            - "/"
+      ListenerArn: !Ref Listener
+      Priority: 1
+
+  Listener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: '80'
+      Protocol: HTTP
 
   # ECS Task Definition
   ECSTaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
-      Family: 'MyTaskDefinition'
-      NetworkMode: 'awsvpc'
+      Family: 'WordPressTaskDefinition'
+      Cpu: 256
+      Memory: 512
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
       ContainerDefinitions:
-        - Name: 'ContainerOne'
-          Image: 'nginx:latest'
+        - Name: 'WordPRess'
+          Image: 'wordpress:latest'
           Memory: 512
           PortMappings:
             - ContainerPort: 80
           Environment:
-            - Name: 'ENV_VAR_1'
-              Value: 'Value1'
-            - Name: 'ENV_VAR_2'
-              Value: 'Value2'
-            - Name: 'ENV_VAR_3'
-              Value: 'Value3'
-            - Name: 'ENV_VAR_4'
-              Value: 'Value4'
+            - Name: 'WORDPRESS_DB_HOST'
+              Value: 'db'
+            - Name: 'WORDPRESS_DB_USER'
+              Value: 'wordpress'
+            - Name: 'WORDPRESS_DB_PASSWORD'
+              Value: 'wordpress'
+            - Name: 'WORDPRESS_DB_NAME'
+              Value: 'wordpress'
           
-        - Name: 'ContainerTwo'
-          Image: 'nginx:latest'
+        - Name: 'MariaDB'
+          Image: 'mariadb:10.6.4-focal'
           Memory: 512
           PortMappings:
-            - ContainerPort: 8080
+            - ContainerPort: 3306
           Environment:
-            - Name: 'ENV_VAR_1'
-              Value: 'Value1'
-            - Name: 'ENV_VAR_2'
-              Value: 'Value2'
-            - Name: 'ENV_VAR_3'
-              Value: 'Value3'
-            - Name: 'ENV_VAR_4'
-              Value: 'Value4'
+            - Name: 'MYSQL_ROOT_PASSWORD'
+              Value: 'somewordpress'
+            - Name: 'MYSQL_DATABASE'
+              Value: 'wordpress'
+            - Name: 'MYSQL_USER'
+              Value: 'wordpress'
+            - Name: 'MYSQL_PASSWORD'
+              Value: 'wordpress'
 
   # ECS Service
   ECSService:
     Type: 'AWS::ECS::Service'
+    DependsOn: [ListenerRule]
     Properties:
-      Cluster: Ref: 'ECSCluster'
+      Cluster: !Ref ECSCluster
       DesiredCount: 2
-      LaunchType: 'FARGATE'
-      TaskDefinition: Ref: 'ECSTaskDefinition'
+      LaunchType: FARGATE
+      TaskDefinition: !Ref ECSTaskDefinition
       LoadBalancers:
-        - TargetGroupArn: Ref: 'TargetGroup'
-          ContainerName: 'ContainerOne'
+        - TargetGroupArn: !Ref TargetGroup
+          ContainerName: 'WordPRess'
           ContainerPort: 80
       NetworkConfiguration:
         AwsvpcConfiguration:
           Subnets:
-            - Ref: 'SubnetId1'
-            - Ref: 'SubnetId2'
+            - !Select [ 0, !Ref SubNetIDs ]
+            - !Select [ 1, !Ref SubNetIDs ]
           SecurityGroups:
-            - Ref: 'SecurityGroupId'
+            - !Ref ECSServiceSecurityGroup
           AssignPublicIp: 'ENABLED'
 
 Outputs:
