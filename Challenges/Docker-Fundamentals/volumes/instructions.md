@@ -17,7 +17,7 @@ docker run \
  -e MYSQL_PASSWORD=wordpress \
  -e MYSQL_DATABASE=wordpress \
  -e MYSQL_USER=wordpress \
- -v "$(pwd)"/mariadb_data1:/var/lib/mysql \
+ -v "$(pwd)"/mariadb_data:/var/lib/mysql \
  -d \
  mariadb:10.6.4-focal \
  --default-authentication-plugin=mysql_native_password
